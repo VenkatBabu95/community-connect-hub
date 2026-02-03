@@ -1,0 +1,10 @@
+project_id = "jcmrniykflmohzplavon"
+
+[functions.create-user]
+verify_jwt = false
+
+[functions.bulk-create-users]
+verify_jwt = false
+
+[functions.setup-admin]
+verify_jwt = false
