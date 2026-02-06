@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send } from 'lucide-react';
+import { Send, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   id: string;
@@ -25,6 +26,16 @@ export default function ChatRoom() {
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+
+  const deleteMessage = async (messageId: string) => {
+    const { error } = await supabase.from('messages').delete().eq('id', messageId);
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to delete message', variant: 'destructive' });
+    } else {
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    }
+  };
 
   useEffect(() => {
     fetchMessages();
@@ -131,7 +142,7 @@ export default function ChatRoom() {
               return (
                 <div
                   key={message.id}
-                  className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}
+                  className={`group flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}
                 >
                   <Avatar className="h-8 w-8 shrink-0">
                     <AvatarFallback className="text-xs">
@@ -156,6 +167,15 @@ export default function ChatRoom() {
                     >
                       <p className="text-sm">{message.content}</p>
                     </div>
+                    {isOwn && (
+                      <button
+                        onClick={() => deleteMessage(message.id)}
+                        className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                        title="Delete message"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );
